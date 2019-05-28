@@ -1,0 +1,43 @@
+interface Executable{
+	int execute();
+}
+// Interface with single method is called functional interface. For exp: Comparable and Runnable interface.
+class Runner{
+	public void run(Executable e) {
+		System.out.println("Executing code block ...");
+		int value = e.execute();
+		System.out.println("Return value is *:"+value);
+	}
+}
+
+/*
+   ()->{
+			System.out.println("This is code passed in a lambda expression");
+			System.out.println("Hello, there");
+		}
+ 
+  
+ */
+
+public class App {
+	
+	public static void main(String[] args) {
+		Runner runner = new Runner();
+		runner.run(new Executable() {
+			public int execute() {
+				System.out.println("Hello, there.");
+				return 7;
+			}
+		});
+		
+		System.out.println("===========LAMBDA===================");
+		runner.run(()->9);
+		
+		runner.run(()->{
+			System.out.println("This is code passed in a lambda expression");
+			System.out.println("Hello, there");
+			return 8;
+		});
+	}
+
+}

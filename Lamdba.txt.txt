@@ -1,0 +1,370 @@
+Let's say, we have a class called Runner which has a method callled run in it.
+Now, let's imagine that for some reason we want to pass a block of code to
+our run method.
+
+class Runner{
+	public void run(){
+	
+	}
+}
+
+===========================In previous Java version======================
+We need to define an interface, let's call it "Executable". We need to 
+give this interface a method, and this method would be the place where
+we put the code we want to run.
+
+interface Executable{
+	int execute();
+}
+
+Now we can make the Runner class accept an object that implements the 
+Executable interface. It's going to get something that implements this 
+interface and it's going to know that object has an execute method. 
+
+class Runner {
+    public void run(Executable e) {
+        e.execute();
+    }
+}
+
+We have made the Runner class call the execute method of whatever object
+implements Executable.
+
+Now to actually use this, we need an instance of the Runner class and 
+an object that implements this interface (we achive this using an anonymous
+class syntax).
+Exp:
+
+interface Executable {
+    void execute();
+}
+
+class Runner {
+    public void run(Executable e) {
+        e.execute();
+    }
+}
+
+public class App {
+
+    public static void main(String[] args) {
+            Runner runner = new Runner();
+            runner.run(new Executable() {
+                public void execute() {
+                    System.out.println("Hello there.");
+                }
+            });
+        }
+}
+
+The whole point of this is just to pass in some code to run() method.
+
+
+=======================Using JAVA 8[Lambda]=====================================
+interface Executable {
+    void execute();
+}
+
+class Runner {
+    public void run(Executable e) {
+        e.execute();
+    }
+}
+
+public class App {
+
+    public static void main(String[] args) {
+            Runner runner = new Runner();
+            runner.run( () -> System.out.println("Hello there.") );
+            
+        }
+}
+
+Well, the block of code that we are passing in run method can have 
+return value and some parameter and it could have few lines of code.
+
+For few lines of code----------------------------------------
+We can use curly braces like this with complete statements.
+
+runner.run( () -> {
+                    System.out.println("Hello there.");
+                    System.out.println("And hello again.");
+                    
+                        
+            });
+
+Functional Interfaces---------------------------------------------------
+Lambda Expression are always associated with interfaces that have a single method.
+JAVA 8 does not introduce any new syntax for specifying that your method parameter 
+is expecting a block of code. You still have to use interfaces, just like in previous 
+version of JAVA. The thing that's new, is that we've got a simplified syntax for passing 
+in the actual block of code. 
+
+An interface that just has a single method called FunctionalInterface. Exp Comparable and Runnable.
+
+Return Values in Lambda Expression-----------------------------------
+
+interface Executable {
+    int execute();
+}
+//OLD WAY
+Runner runner = new Runner();
+runner.run(new Executable() {
+	public int execute() {
+		System.out.println("Hello there.");
+		System.out.println("And hello again.");
+		return 7;
+	}
+});
+//WITH JAVA 8
+runner.run( () -> {
+    System.out.println("Hello there.");
+    System.out.println("And hello again.");
+    return 7;
+});
+// OR EVEN THIS
+runner.run( () -> 7);
+
+Lambda Expression Parameters---------------------------------------------
+
+interface Executable {
+    void execute(int a);
+}
+
+class Runner {
+    public int run(Executable e) {
+        int value = e.execute("Hello");
+        System.out.println("Return value is: " + value);
+    }
+}
+
+public class App {
+
+    public static void main(String[] args) {
+            Runner runner = new Runner();
+            
+            // Anonymous class
+            runner.run(new Executable() {
+                public int execute(int a) {
+                    System.out.println("Hello there.");
+                    System.out.println("And hello again.");
+                    return 7 + a;
+                }
+            });
+            
+            // Lambda expression
+            runner.run( a -> {
+                System.out.println("Hello there.");
+                System.out.println("And hello again.");
+                return 7 + a;
+            });
+            
+        }
+}
+
+//ANOTHER EXAMPLE
+interface Executable {
+    void execute(int a, int b);
+}
+
+class Runner {
+    public int run(Executable e) {
+        int value = e.execute("Hello");
+        System.out.println("Return value is: " + value);
+    }
+}
+
+public class App {
+
+    public static void main(String[] args) {
+            Runner runner = new Runner();
+            
+            // Anonymous class
+            runner.run(new Executable() {
+                public int execute(int a, int b) {
+                    System.out.println("Hello there.");
+                    System.out.println("And hello again.");
+                    return a + b;
+                }
+            });
+            
+            // Lambda expression
+            runner.run( (a, b) -> {
+                System.out.println("Hello there.");
+                System.out.println("And hello again.");
+                return a + b;
+            });
+            
+        }
+}
+
+Resolving Parameters Ambiguity --------------------------------------
+
+	interface Executable {
+    void execute(int a);
+}
+
+interface StringExecutable {
+    int execute(String a);
+}
+
+
+class Runner {
+    public int run(Executable e) {
+        e.execute(7);
+    }
+    
+    public void run(StringExecutable e) {
+        System.out.println("Executing code block ...");
+        int value = e.execute("Hello");
+        System.out.println("Return value is: " + value);
+    }
+    
+}
+
+public class App {
+
+    public static void main(String[] args) {
+            Runner runner = new Runner();
+            
+            // Anonymous class
+            runner.run(new Executable() {
+                public int execute(int a) {
+                    System.out.println("Hello there.");
+                    System.out.println("And hello again.");
+                    return a + 7;
+                }
+            });
+            
+            // Lambda expression
+            runner.run( (int a) -> {
+                System.out.println("Hello there.");
+                System.out.println("And hello again.");
+                return a + 7;
+            });
+            
+        }
+}
+
+Lambda Expression and Scope; "Effectively Final"---------------------
+
+What if we want to use variables from your calling method in the block of code 
+that you want ot pass to a method ?
+In JDK7, if you use a local variable in an anonymous class, you had to declare 
+it final, but in JDK8, the “final” is no longer necessary -- provided we assign
+our local variable a value when we declare it and then don't change that value.
+
+public class App {
+
+    public static void main(String[] args) {
+    
+            int c = 9;
+            
+            // Can use c in our anonymous class methods and lambda expressions
+            // as long as we don't change its value after assigning.
+            // We say it's "effectively final"
+            
+            Runner runner = new Runner();
+            
+            // Anonymous class
+            runner.run(new Executable() {
+                public int execute(int a, int b) {
+                    System.out.println("Hello there.");
+                    System.out.println("And hello again.");
+                    return a + b + c;
+                }
+            });
+            
+            // Lambda expression
+            runner.run( (a, b) -> {
+                System.out.println("Hello there.");
+                System.out.println("And hello again.");
+                return a + b + c;
+            });
+            
+        }
+}
+
+Unlike the anonymous class method, the lambda expression inherits the scope of the
+enclosing method. 
+
+public class App {
+
+    public static void main(String[] args) {
+    
+            int c = 9;
+            
+            // Can use c in our anonymous class methods and lambda expressions
+            // as long as we don't change its value after assigning.
+            // We say it's "effectively final"
+            
+            int d = 11;
+            
+            Runner runner = new Runner();
+            
+            // Anonymous class
+            runner.run(new Executable() {
+                public int execute(int a, int b) {
+                    int d = 24; // This is a completely new "d"!
+                    System.out.println("Hello there.");
+                    System.out.println("And hello again.");
+                    return a + b + c;
+                }
+            });  
+        }
+}
+
+Let's try with Lambda Expression
+
+public class App {
+
+    public static void main(String[] args) {
+    
+            int c = 9;
+            
+            // Can use c in our anonymous class methods and lambda expressions
+            // as long as we don't change its value after assigning.
+            // We say it's "effectively final"
+            
+            int d = 11;
+            
+            Runner runner = new Runner();
+            
+            // Lambda expression
+            runner.run( (a, b) -> {
+                int d = 7; // SYNTAX ERROR!
+                System.out.println("Hello there.");
+                System.out.println("And hello again.");
+                return a + b + c;
+            });
+            
+        }
+}
+
+Lambda Expression are Objects--------------------------------------
+
+We get a compilation error. The error is "lambda expression local variable d can 
+not declare another local variable defined in an enclosing scope." The lambda expression
+inherits the calling method's scope, and we can not declare a variable that's already
+defined in the calling method.
+
+We can store the lambda expression in a variable of the interface type if we want.
+
+Executable ex = (a,b) -> {
+    System.out.println("Hello there.");
+    return a+b;
+};
+runner.run(ex);
+
+If you want to assingn it to an object or you want to assign it to some superclass
+of the interface, then you need a cast in there.
+
+Object codeblock = (Executable)(a,b) -> {
+    return a + b;
+};
+runner.run(ex);
+
+With lambda expression, now ArrayList have a sort method. You can pass the sort()
+method of ArrayList a lambda expression that specifies how to sort the list, which is 
+rather nice. 
+
